@@ -2,20 +2,25 @@ import * as React from 'react';
 import {useCallback, useState} from 'react';
 import Map, {Layer, Source} from 'react-map-gl/maplibre';
 import type {FillLayer} from 'react-map-gl/maplibre';
-import {Calendar} from 'react-calendar'
 import './App.css'
 import DatePicker from "react-datepicker";
 
 import 'react-calendar/dist/Calendar.css';
 import "react-datepicker/dist/react-datepicker.css";
-import riskGeoJson from './risk.json';
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
 import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons'
+import ApiService from './services/api.service';
 
 type ValuePiece = Date | null;
 
 type Value = ValuePiece | [ValuePiece, ValuePiece];
 
+
+const apiUrl = process.env.REACT_APP_API_URL
+if (!apiUrl) {
+  throw new Error("REACT_APP_API_URL is not defined")
+}
+const api = new ApiService(apiUrl);
 
 const daysInFuture = 7;
 const daysInPast = 365
@@ -37,11 +42,28 @@ const layerStyle: FillLayer = {
         [6, "black"],
       ],
     },
-    "fill-opacity": 1,
+    "fill-opacity": 0.2,
   }
 };
 
 function App() {
+
+  const dateOneDayBeforeDate = (date: Date) => {
+    let newDate = new Date(date)
+    newDate.setDate(newDate.getDate() - 1)
+    return newDate
+  }
+  const dateOneDayAfterDate = (date: Date) => {
+    let newDate = new Date(date)
+    newDate.setDate(newDate.getDate() + 1)
+    return newDate
+  }
+
+  let maxDayInfuture = new Date();
+  maxDayInfuture.setDate(maxDayInfuture.getDate() + daysInFuture);
+  let minDaysInPast = new Date();
+  minDaysInPast.setDate(minDaysInPast.getDate() - daysInPast);
+
   const [viewState, setViewState] = useState({
     longitude: 1.9038900,
     latitude: 47.9028900,
@@ -49,6 +71,21 @@ function App() {
   });
   const [mode, setMode] = useState<"predictive" | "past">("past");
   const [hoverInfo, setHoverInfo] = useState<any>(null);
+  const [geojson, setGeojson] = useState<any>(null);
+
+  const [date, setDate] = useState<Date>(dateOneDayBeforeDate(new Date()));
+
+  const getGeojsonFromDate = async () => {
+    setGeojson(await api.getFwiGeoJsonForDate(new Date()))
+  }
+
+  React.useEffect(() => {
+    getGeojsonFromDate()
+  },[])
+
+  React.useEffect(() => {
+    console.log("date changed")
+  },[date])
 
   const onHover = useCallback((event: any) => {
       const {
@@ -60,17 +97,6 @@ function App() {
     // prettier-ignore
     setHoverInfo(hoveredFeature && {feature: hoveredFeature, x, y});
   }, []);
-
-  let yesterday = new Date();
-  yesterday.setDate(yesterday.getDate() - 1);
-  let tomorrow = new Date();
-  tomorrow.setDate(tomorrow.getDate() + 1);
-  let maxDayInfuture = new Date();
-  maxDayInfuture.setDate(maxDayInfuture.getDate() + daysInFuture);
-  let minDaysInPast = new Date();
-  minDaysInPast.setDate(minDaysInPast.getDate() - daysInPast);
-
-  const [date, setDate] = useState<Date>(yesterday);
 
   const onModeChange = (changedMode: "predictive"|"past") => {
     setMode(changedMode)
@@ -104,9 +130,10 @@ function App() {
   }
 
   const isNextdaySelectable = () => {
-    console.log(mode, date, new Date(), date < new Date())
+    console.log(mode, date, new Date(), date < dateOneDayBeforeDate(new Date()))
+
     if (mode === "past") {
-      return date < new Date()
+      return date < dateOneDayBeforeDate(new Date())
     }
     return date < maxDayInfuture
   }
@@ -148,7 +175,7 @@ function App() {
             onMove={evt => setViewState(evt.viewState)}
             onMouseMove={onHover}
             >
-            <Source id="my-data" type="geojson" data={riskGeoJson}>
+            <Source id="my-data" type="geojson" data={geojson}>
                 <Layer {...layerStyle} />
               </Source>
           </Map>;
