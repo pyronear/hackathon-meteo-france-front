@@ -1,38 +1,198 @@
-.App {
+body{
+  background-color: #ececec;
+}
+
+#mapsContainer {
+  display: flex;
+  flex-direction: row;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100%;
+  flex-grow: 1;
+  overflow: hidden;
+}
+
+#mapsContainer .maplibregl-map {
+  width: 100%;
+  min-width: 50vw;
+}
+div.btn-container{
+  display: table-cell;
+  vertical-align: middle;
   text-align: center;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
+div.btn-container i{
+  display: inline-block;
+  position: relative;
+  top: -9px;
 }
 
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
+label {
+  font-size: 13px;
+  color: #424242;
+  font-weight: 500;
 }
 
-.App-header {
-  background-color: #282c34;
-  min-height: 100vh;
+.btn-color-mode-switch{
+  display: inline-block;
+  margin: 0px;
+  position: relative;
+}
+
+.btn-color-mode-switch > label.btn-color-mode-switch-inner{
+  margin: 0px;
+  width: 150px;
+  height: 30px;
+  background: #E0E0E0;
+  border-radius: 26px;
+  overflow: hidden;
+  position: relative;
+  transition: all 0.3s ease;
+  /*box-shadow: 0px 0px 8px 0px rgba(17, 17, 17, 0.34) inset;*/
+  display: block;
+}
+
+.btn-color-mode-switch > label.btn-color-mode-switch-inner:before{
+  content: attr(data-on);
+  position: absolute;
+  font-size: 12px;
+  font-weight: 500;
+  top: 7px;
+  right: 20px;
+
+}
+
+.btn-color-mode-switch > label.btn-color-mode-switch-inner:after{
+  content: attr(data-off);
+  width: 70px;
+  height: 16px;
+  background: #fff;
+  border-radius: 26px;
+  position: absolute;
+  left: 2px;
+  top: 2px;
+  text-align: center;
+  transition: all 0.3s ease;
+  box-shadow: 0px 0px 6px -2px #111;
+  padding: 5px 0px;
+}
+
+.btn-color-mode-switch > .alert{
+  display: none;
+  background: #FF9800;
+  border: none;
+  color: #fff;
+}
+
+.btn-color-mode-switch input[type="checkbox"]{
+  cursor: pointer;
+  width: 50px;
+  height: 25px;
+  opacity: 0;
+  position: absolute;
+  top: 0;
+  z-index: 1;
+  margin: 0px;
+}
+
+.btn-color-mode-switch input[type="checkbox"]:checked + label.btn-color-mode-switch-inner{
+  background: #002e0b;
+  color: #fff;
+}
+
+.btn-color-mode-switch input[type="checkbox"]:checked + label.btn-color-mode-switch-inner:after{
+  content: attr(data-on);
+  left: 68px;
+  background: #256400;
+}
+
+.btn-color-mode-switch input[type="checkbox"]:checked + label.btn-color-mode-switch-inner:before{
+  content: attr(data-off);
+  right: auto;
+  left: 30px;
+}
+.btn-color-mode-switch input[type="checkbox"]:checked ~ .alert{
+  display: block;
+}
+
+/* Legend stuff */
+.legend {
+  max-width: 30vw;
+}
+
+.legend-square {
+  height: 1rem;
+  width: 1rem;
+  display: inline-block;
+  margin-right: 0.5rem;
+  border-radius: 20%;
+}
+.legend-item {
   display: flex;
-  flex-direction: column;
   align-items: center;
-  justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
 }
 
-.App-link {
-  color: #61dafb;
+/* Navbar stuff */
+
+nav {
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 105px 0 105px;
+  background: #ffffff;
+  position: relative;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+nav #logo {
+  width: 215px;
+  height: 44px;
+  margin-left: -10px;
+}
+
+nav #about {
+  display: inline-block;
+  vertical-align: middle;
+  line-height: normal;
+  font-family: 'Proxima Nova', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+  /* identical to box height */
+  text-decoration-line: underline;
+  /* Acccent - Pines */
+  color: #054546;
+  cursor: pointer;
+}
+
+/* Calendar stuff */
+.calendarContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.calendarChevron { 
+  cursor: pointer;
+  color: black;
+}
+.calendarChevron.disabled{ 
+  color: rgb(65, 65, 65);
+}
+
+/* Containers stuff */
+#mainContainer {
+  position: relative;
+}
+#configContainer {
+  position: absolute;
+  top: 30px;
+  left: 10px;
+  z-index: 2;
+  width: 400px;
+  background-color: rgba(255, 255, 255, 0.596);
+  padding: 20px;
+  border-radius: 5px;
 }
