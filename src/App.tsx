@@ -170,9 +170,13 @@ function App() {
             <FontAwesomeIcon icon={faChevronRight} style={{color : (isPreviousDaySelectable() ? "" : "disabled")}} className='calendarChevron' onClick={onNextDay}/>
             <Toggle onChange={onModeChange}/>
           </div>
-          <Legend/>
+          <PredictionLegend date={date} isFuture={mode === "predictive"}/>
           {loading && <FontAwesomeIcon  className="loader" icon={faFireFlameCurved} beatFade/>}
         </div>
+
+        {mode === "past" && <div id="detectionLegendContainer">
+          <DetectionLegend date={date}/>
+        </div>}
         <div id="mapsContainer">
           <Map
             {...viewState}
@@ -215,8 +219,14 @@ function Toggle ({onChange}: {onChange: (changedMode: "predictive"|"past") => vo
 
 }
 
-function Legend () {
+function PredictionLegend ({date, isFuture}: {date: Date, isFuture: boolean}) {
   return <div className="legend">
+    {
+      isFuture ?
+      <h2>Prévision de feux pour la journée du {date.toLocaleDateString('fr')}</h2>:
+      <h2>Historique de prévision de feux pour la journée du {date.toLocaleDateString('fr')}</h2>
+    }
+    
     <p>L'<a href="https://forest-fire.emergency.copernicus.eu/">EFFIS (European Forest Fire Information System)</a> représente l'IFM (Indice Feu Météo) à travers les 6 catégories suivantes :</p>
     <div className="legend-item">
       <span className='legend-square' style={{ height: "1rem",width: "1rem",display: "inline-block", backgroundColor: "green"}}></span>
@@ -242,6 +252,12 @@ function Legend () {
       <span className='legend-square' style={{ height: "1rem",width: "1rem",display: "inline-block", backgroundColor: "black"}}></span>
       <span className="legend-label">Très extrême</span>
     </div>
+  </div>
+}
+
+function DetectionLegend({date}: {date: Date}) {
+  return <div className="legend">
+    <h2>Détections de feux pour la journée du {date.toLocaleDateString('fr')}</h2>
   </div>
 }
 
