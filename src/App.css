@@ -143,6 +143,9 @@ label {
   display: flex;
   align-items: center;
 }
+.legend-info {
+  font-style: italic;
+}
 
 /* Navbar stuff */
 
@@ -268,3 +271,28 @@ nav #about {
 /* titles stuff */
 
 h2 { font-size: medium;}
+
+/* Maps container */
+.mapContainer {
+  height: 100%;
+  position: relative;
+}
+
+.no-data {
+  position: absolute;
+  top: 50%;  /* position the top  edge of the element at the middle of the parent */
+  left: 50%; /* position the left edge of the element at the middle of the parent */
+
+  transform: translate(-50%, -50%);
+
+  z-index: 4;
+  display: flex;
+  font-size: 2em;
+  color: #0000009c;
+
+}
+
+.no-data p{
+  margin: 0;
+  margin-left: 20px;
+}

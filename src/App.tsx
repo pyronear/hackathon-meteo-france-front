@@ -9,7 +9,7 @@ import { fr } from 'date-fns/locale/fr';
 import 'react-calendar/dist/Calendar.css';
 import "react-datepicker/dist/react-datepicker.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight, faFireFlameCurved} from '@fortawesome/free-solid-svg-icons'
+import { faChevronLeft, faChevronRight, faFireFlameCurved, faFireExtinguisher} from '@fortawesome/free-solid-svg-icons'
 import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import ApiService from './services/api.service';
 registerLocale('fr', fr)
@@ -27,7 +27,7 @@ if (!apiUrl) {
 }
 const api = new ApiService(apiUrl);
 
-const daysInFuture = 6;
+const daysInFuture = 2;
 const daysInPast = 1000
 
 const predictionLayerStyle: FillLayer = {
@@ -89,19 +89,23 @@ function App() {
 
   let maxDayInfuture = new Date();
   maxDayInfuture.setDate(maxDayInfuture.getDate() + daysInFuture);
+  console.log(maxDayInfuture)
   let minDaysInPast = new Date();
   minDaysInPast.setDate(minDaysInPast.getDate() - daysInPast);
 
   const [viewState, setViewState] = useState({
-    longitude: 1.9038900,
-    latitude: 47.9028900,
-    zoom: 4
+    longitude: -0.9929634774681517,
+    latitude: 44.38580171870862,
+    zoom: 6
   });
   const [mode, setMode] = useState<"predictive" | "past">("past");
   const [hoverInfo, setHoverInfo] = useState<any>(null);
+
   const [predictionGeojson, setPredictionGeojson] = useState<any>(null);
   const [detectionGeojson, setDetectionGeojson] = useState<any>(null);
+  const [predictionFirstLoaded, setPredictionFirstLoaded] = useState<boolean>(false);
   const [predictionLoading, setPredictionLoading] = useState<boolean>(true);
+  const [detectionFirstLoaded, setDetectionFirstLoaded] = useState<boolean>(false);
   const [detectionLoading, setDetectionLoading] = useState<boolean>(true);
 
   const [date, setDate] = useState<Date>(dateOneDayBeforeDate(new Date()));
@@ -111,8 +115,8 @@ function App() {
     const geojson = await api.getFwiGeoJsonForDate(date)
     if (geojson !== null) {
       setPredictionGeojson(geojson)
-      console.log(predictionGeojson)
       setPredictionLoading(false)
+      setPredictionFirstLoaded(true)
     }
   }
 
@@ -121,8 +125,8 @@ function App() {
     const geojson = await api.getFiresGeoJsonForDate(date)
     if (geojson !== null) {
       setDetectionGeojson(geojson)
-      console.log(detectionGeojson)
       setDetectionLoading(false)
+      setDetectionFirstLoaded(true)
     }
   }
 
@@ -175,12 +179,12 @@ function App() {
   }
 
   const isNextdaySelectable = () => {
-    console.log(mode, date, new Date(), date < dateOneDayBeforeDate(new Date()))
+console.log(mode, date, new Date(), date < dateOneDayBeforeDate(new Date()))
 
     if (mode === "past") {
       return date < dateOneDayBeforeDate(new Date())
     }
-    return date < maxDayInfuture
+    return date < dateOneDayBeforeDate(maxDayInfuture)
   }
 
   const onPreviousDay = () => {
@@ -197,6 +201,10 @@ function App() {
       newDate.setDate(newDate.getDate() + 1)
       setDate(newDate)
     }
+  }
+
+  const geoJsonIsEmpty = (geojson: any) => {
+    return geojson === null || geojson.features.length === 0
   }
 
   return (
@@ -219,31 +227,38 @@ function App() {
           <DetectionLegend date={date}/>
         </div>}
         <div id="mapsContainer">
-          <Map
-            {...viewState}
-            mapStyle={`https://api.maptiler.com/maps/streets/style.json?key=${process.env.REACT_APP_MAPTILER_API_KEY}`}
-            onMove={evt => setViewState(evt.viewState)}
-            onMouseMove={onHover}
-            >
-            {/* <Source id="my-data" type="geojson" data={gridding}>
-              <Layer {...griddingLayerStyle}/>
-            </Source> */}
-            <Source id="my-data" type="geojson" data={predictionGeojson}>
-            <Layer {...predictionLayerStyle} />
-            </Source>
-
-          </Map>;
-          {mode === "past" && <Map
-              // onMove={onMapMove}
+          {geoJsonIsEmpty(predictionGeojson) && predictionFirstLoaded && <NoData/>}
+          <div className="mapContainer">
+            <Map
               {...viewState}
-              onMouseMove={onHover}
               mapStyle={`https://api.maptiler.com/maps/streets/style.json?key=${process.env.REACT_APP_MAPTILER_API_KEY}`}
-              onMove={evt => setViewState(evt.viewState)}
-            >
-            <Source id="fires" type="geojson" data={detectionGeojson}>
-              <Layer {...firesLayerStyle} />
-            </Source>
-          </Map>}
+              onMove={evt => {setViewState(evt.viewState); console.log(evt)}}
+              onMouseMove={onHover}
+              >
+              {/* <Source id="my-data" type="geojson" data={gridding}>
+                <Layer {...griddingLayerStyle}/>
+              </Source> */}
+              <Source id="my-data" type="geojson" data={predictionGeojson}>
+              <Layer {...predictionLayerStyle} />
+              </Source>
+
+            </Map>
+          </div>
+          {mode === "past" && <div className="mapContainer">
+            {geoJsonIsEmpty(detectionGeojson) && detectionFirstLoaded &&<NoData/>}
+            <Map
+                // onMove={onMapMove}
+                {...viewState}
+                onMouseMove={onHover}
+                mapStyle={`https://api.maptiler.com/maps/streets/style.json?key=${process.env.REACT_APP_MAPTILER_API_KEY}`}
+                onMove={evt => setViewState(evt.viewState)}
+              >
+              <Source id="fires" type="geojson" data={detectionGeojson}>
+                <Layer {...firesLayerStyle} />
+              </Source>
+            </Map>
+          </div>}
+
         </div>
       </div>
     </>
@@ -274,7 +289,7 @@ function PredictionLegend ({date, isFuture}: {date: Date, isFuture: boolean}) {
       <h2>Prévision de feux pour la journée du {date.toLocaleDateString('fr')}</h2>:
       <h2>Historique de prévision de feux pour la journée du {date.toLocaleDateString('fr')}</h2>
     }
-    
+
     <p>L'<a href="https://forest-fire.emergency.copernicus.eu/">EFFIS (European Forest Fire Information System)</a> représente l'IFM (Indice Feu Météo) à travers les 6 catégories suivantes :</p>
     <div className="legend-item">
       <span className='legend-square' style={{ height: "1rem",width: "1rem",display: "inline-block", backgroundColor: "green"}}></span>
@@ -310,6 +325,7 @@ function DetectionLegend({date}: {date: Date}) {
       <span className='legend-circle' style={{ height: "1rem",width: "1rem",display: "inline-block", backgroundColor: "red"}}></span>
       <span className="legend-label">Détection de feu</span>
     </div>
+    <p className="legend-info">Les données de detection s'arrêtent au 31/12/2022</p>
   </div>
 }
 
@@ -332,9 +348,10 @@ function Navbar() {
 }
 
 
-function ToolBox() {
-  return <div className="toolbox">
-
+function NoData() {
+  return <div className="no-data">
+    <FontAwesomeIcon icon={faFireExtinguisher} className='no-data-icon'/>
+    <p>Pas de donnée</p>
   </div>
 }
 export default App
