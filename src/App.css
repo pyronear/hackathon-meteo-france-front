@@ -214,7 +214,12 @@ nav #about {
   align-items: center;
 }
 
-.navRight
+.toolsContainer {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between;
+}
 
 /* Calendar stuff */
 .calendarContainer {
@@ -276,6 +281,10 @@ h2 { font-size: medium;}
 .mapContainer {
   height: 100%;
   position: relative;
+  width: 50%;
+}
+.mapContainer.full {
+  width: 100%;
 }
 
 .no-data {

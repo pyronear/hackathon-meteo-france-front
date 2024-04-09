@@ -211,12 +211,13 @@ console.log(mode, date, new Date(), date < dateOneDayBeforeDate(new Date()))
     <>
       <Navbar/>
       <div id="mainContainer">
-
         <div id="configContainer">
-          <div className="calendarContainer">
-            <FontAwesomeIcon icon={faChevronLeft} style={{color : (isPreviousDaySelectable() ? "" : "disabled")}} className='calendarChevron' onClick={onPreviousDay}/>
-            <DatePicker dateFormat="dd/MM/yyyy" locale="fr" selected={date} startDate={date} onChange={onCalendarDateChange} {...calendarSettings}/>
-            <FontAwesomeIcon icon={faChevronRight} style={{color : (isPreviousDaySelectable() ? "" : "disabled")}} className='calendarChevron' onClick={onNextDay}/>
+          <div className="toolsContainer">
+            <div className="calendarContainer">
+              <FontAwesomeIcon icon={faChevronLeft} style={{color : (isPreviousDaySelectable() ? "" : "disabled")}} className='calendarChevron' onClick={onPreviousDay}/>
+              <DatePicker dateFormat="dd/MM/yyyy" locale="fr" selected={date} startDate={date} onChange={onCalendarDateChange} {...calendarSettings}/>
+              <FontAwesomeIcon icon={faChevronRight} style={{color : (isPreviousDaySelectable() ? "" : "disabled")}} className='calendarChevron' onClick={onNextDay}/>
+            </div>
             <Toggle onChange={onModeChange}/>
           </div>
           <PredictionLegend date={date} isFuture={mode === "predictive"}/>
@@ -228,7 +229,7 @@ console.log(mode, date, new Date(), date < dateOneDayBeforeDate(new Date()))
         </div>}
         <div id="mapsContainer">
           {geoJsonIsEmpty(predictionGeojson) && predictionFirstLoaded && <NoData/>}
-          <div className="mapContainer">
+          <div className={`${mode === "predictive" ? "full " : ""}mapContainer`}>
             <Map
               {...viewState}
               mapStyle={`https://api.maptiler.com/maps/streets/style.json?key=${process.env.REACT_APP_MAPTILER_API_KEY}`}
