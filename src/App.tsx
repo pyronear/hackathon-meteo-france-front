@@ -8,7 +8,7 @@ import DatePicker from "react-datepicker";
 import 'react-calendar/dist/Calendar.css';
 import "react-datepicker/dist/react-datepicker.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight } from '@fortawesome/free-solid-svg-icons'
+import { faChevronLeft, faChevronRight, faFireFlameCurved } from '@fortawesome/free-solid-svg-icons'
 import ApiService from './services/api.service';
 
 type ValuePiece = Date | null;
@@ -22,7 +22,7 @@ if (!apiUrl) {
 }
 const api = new ApiService(apiUrl);
 
-const daysInFuture = 7;
+const daysInFuture = 6;
 const daysInPast = 365
 
 const layerStyle: FillLayer = {
@@ -72,19 +72,23 @@ function App() {
   const [mode, setMode] = useState<"predictive" | "past">("past");
   const [hoverInfo, setHoverInfo] = useState<any>(null);
   const [geojson, setGeojson] = useState<any>(null);
+  const [loading, setLoading] = useState<boolean>(true);
 
   const [date, setDate] = useState<Date>(dateOneDayBeforeDate(new Date()));
 
   const getGeojsonFromDate = async () => {
-    setGeojson(await api.getFwiGeoJsonForDate(new Date()))
+    setLoading(true)
+    const geojson = await api.getFwiGeoJsonForDate(date)
+    if (geojson !== null) {
+      setGeojson(geojson)
+      setLoading(false)
+    }
+
   }
 
   React.useEffect(() => {
-    getGeojsonFromDate()
-  },[])
-
-  React.useEffect(() => {
     console.log("date changed")
+    getGeojsonFromDate()
   },[date])
 
   const onHover = useCallback((event: any) => {
@@ -167,6 +171,7 @@ function App() {
             <Toggle onChange={onModeChange}/>
           </div>
           <Legend/>
+          {loading && <FontAwesomeIcon  className="loader" icon={faFireFlameCurved} beatFade/>}
         </div>
         <div id="mapsContainer">
           <Map

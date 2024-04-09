@@ -196,3 +196,13 @@ nav #about {
   padding: 20px;
   border-radius: 5px;
 }
+
+/* loader stuff */
+.loader {
+  position: absolute;
+  top: calc(50% - 50px);
+  left: calc(50% - 50px);
+  height: 100px;
+  width: 100px;
+  color:#00000050;
+}
