@@ -43,4 +43,9 @@ export default class ApiService {
             throw e
         }
     }
+
+    onTearDown() {
+        this.firesAbortController.abort()
+        this.fwiAbortController.abort()
+    }
 }

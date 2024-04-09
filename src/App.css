@@ -213,6 +213,12 @@ nav #about {
   display: flex;
   align-items: center;
 }
+.navRight a {
+  color: #ff9900;
+  text-decoration: none;
+  margin-left: 10px;
+  font-weight: 700;
+}
 
 .toolsContainer {
   display: flex;

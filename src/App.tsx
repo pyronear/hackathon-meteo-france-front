@@ -28,7 +28,7 @@ if (!apiUrl) {
 const api = new ApiService(apiUrl);
 
 const daysInFuture = 2;
-const daysInPast = 1000
+const daysInPast = 2000
 
 const predictionLayerStyle: FillLayer = {
   id: 'predict',
@@ -134,6 +134,7 @@ function App() {
     console.log("date changed")
     getPredictionGeoJsonFromDate()
     getDetectionGeoJsonFromDate()
+    return () => api.onTearDown()
   },[date])
 
   const onHover = useCallback((event: any) => {
