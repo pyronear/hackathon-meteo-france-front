@@ -34,7 +34,7 @@ export default class ApiService {
             this.firesAbortController.abort()
             this.firesAbortController = new AbortController()
 
-            const response = await axios.post(`${this.url}/fwi/load`, {date: this.formatDate(date)}, {signal: this.fwiAbortController.signal})
+            const response = await axios.post(`${this.url}/wildfires/load`, {date: this.formatDate(date)}, {signal: this.firesAbortController.signal})
             return response.data
         } catch (e) {
             if (axios.isAxiosError(e) && (e.code === 'ERR_CANCELED')) {

@@ -1,15 +1,20 @@
 import * as React from 'react';
 import {useCallback, useState} from 'react';
 import Map, {Layer, Source} from 'react-map-gl/maplibre';
-import type {FillLayer} from 'react-map-gl/maplibre';
+import type {CircleLayer, FillLayer} from 'react-map-gl/maplibre';
 import './App.css'
-import DatePicker from "react-datepicker";
+import DatePicker, {registerLocale} from "react-datepicker";
+import { fr } from 'date-fns/locale/fr';
 
 import 'react-calendar/dist/Calendar.css';
 import "react-datepicker/dist/react-datepicker.css";
 import { FontAwesomeIcon } from '@fortawesome/react-fontawesome';
-import { faChevronLeft, faChevronRight, faFireFlameCurved } from '@fortawesome/free-solid-svg-icons'
+import { faChevronLeft, faChevronRight, faFireFlameCurved} from '@fortawesome/free-solid-svg-icons'
+import { faGithub } from '@fortawesome/free-brands-svg-icons'
 import ApiService from './services/api.service';
+registerLocale('fr', fr)
+
+// import gridding from './carro.json';
 
 type ValuePiece = Date | null;
 
@@ -23,10 +28,10 @@ if (!apiUrl) {
 const api = new ApiService(apiUrl);
 
 const daysInFuture = 6;
-const daysInPast = 365
+const daysInPast = 1000
 
-const layerStyle: FillLayer = {
-  id: 'fill',
+const predictionLayerStyle: FillLayer = {
+  id: 'predict',
   type: 'fill',
   source: "risk",
   paint: {
@@ -43,6 +48,29 @@ const layerStyle: FillLayer = {
       ],
     },
     "fill-opacity": 0.2,
+  }
+};
+
+const griddingLayerStyle: FillLayer = {
+  id: 'gridding',
+  type: 'fill',
+  source:'data.gouv.fr',
+  paint: {
+    "fill-outline-color": "black",
+    "fill-color": "transparent",
+    "fill-opacity": 0.2
+  }
+}
+
+const firesLayerStyle: CircleLayer = {
+  id: 'predict',
+  type: 'circle',
+  source: "risk",
+  paint:{
+    "circle-radius": 10,
+    "circle-color": "red",
+    "circle-opacity": 0.4,
+
   }
 };
 
@@ -71,24 +99,37 @@ function App() {
   });
   const [mode, setMode] = useState<"predictive" | "past">("past");
   const [hoverInfo, setHoverInfo] = useState<any>(null);
-  const [geojson, setGeojson] = useState<any>(null);
-  const [loading, setLoading] = useState<boolean>(true);
+  const [predictionGeojson, setPredictionGeojson] = useState<any>(null);
+  const [detectionGeojson, setDetectionGeojson] = useState<any>(null);
+  const [predictionLoading, setPredictionLoading] = useState<boolean>(true);
+  const [detectionLoading, setDetectionLoading] = useState<boolean>(true);
 
   const [date, setDate] = useState<Date>(dateOneDayBeforeDate(new Date()));
 
-  const getGeojsonFromDate = async () => {
-    setLoading(true)
+  const getPredictionGeoJsonFromDate = async () => {
+    setPredictionLoading(true)
     const geojson = await api.getFwiGeoJsonForDate(date)
     if (geojson !== null) {
-      setGeojson(geojson)
-      setLoading(false)
+      setPredictionGeojson(geojson)
+      console.log(predictionGeojson)
+      setPredictionLoading(false)
     }
+  }
 
+  const getDetectionGeoJsonFromDate = async () => {
+    setDetectionLoading(true)
+    const geojson = await api.getFiresGeoJsonForDate(date)
+    if (geojson !== null) {
+      setDetectionGeojson(geojson)
+      console.log(detectionGeojson)
+      setDetectionLoading(false)
+    }
   }
 
   React.useEffect(() => {
     console.log("date changed")
-    getGeojsonFromDate()
+    getPredictionGeoJsonFromDate()
+    getDetectionGeoJsonFromDate()
   },[date])
 
   const onHover = useCallback((event: any) => {
@@ -166,12 +207,12 @@ function App() {
         <div id="configContainer">
           <div className="calendarContainer">
             <FontAwesomeIcon icon={faChevronLeft} style={{color : (isPreviousDaySelectable() ? "" : "disabled")}} className='calendarChevron' onClick={onPreviousDay}/>
-            <DatePicker selected={date} startDate={date} onChange={onCalendarDateChange} {...calendarSettings}/>
+            <DatePicker dateFormat="dd/MM/yyyy" locale="fr" selected={date} startDate={date} onChange={onCalendarDateChange} {...calendarSettings}/>
             <FontAwesomeIcon icon={faChevronRight} style={{color : (isPreviousDaySelectable() ? "" : "disabled")}} className='calendarChevron' onClick={onNextDay}/>
             <Toggle onChange={onModeChange}/>
           </div>
           <PredictionLegend date={date} isFuture={mode === "predictive"}/>
-          {loading && <FontAwesomeIcon  className="loader" icon={faFireFlameCurved} beatFade/>}
+          {predictionLoading && detectionLoading && <FontAwesomeIcon  className="loader" icon={faFireFlameCurved} beatFade/>}
         </div>
 
         {mode === "past" && <div id="detectionLegendContainer">
@@ -184,9 +225,13 @@ function App() {
             onMove={evt => setViewState(evt.viewState)}
             onMouseMove={onHover}
             >
-            <Source id="my-data" type="geojson" data={geojson}>
-                <Layer {...layerStyle} />
-              </Source>
+            {/* <Source id="my-data" type="geojson" data={gridding}>
+              <Layer {...griddingLayerStyle}/>
+            </Source> */}
+            <Source id="my-data" type="geojson" data={predictionGeojson}>
+            <Layer {...predictionLayerStyle} />
+            </Source>
+
           </Map>;
           {mode === "past" && <Map
               // onMove={onMapMove}
@@ -195,6 +240,9 @@ function App() {
               mapStyle={`https://api.maptiler.com/maps/streets/style.json?key=${process.env.REACT_APP_MAPTILER_API_KEY}`}
               onMove={evt => setViewState(evt.viewState)}
             >
+            <Source id="fires" type="geojson" data={detectionGeojson}>
+              <Layer {...firesLayerStyle} />
+            </Source>
           </Map>}
         </div>
       </div>
@@ -258,6 +306,10 @@ function PredictionLegend ({date, isFuture}: {date: Date, isFuture: boolean}) {
 function DetectionLegend({date}: {date: Date}) {
   return <div className="legend">
     <h2>Détections de feux pour la journée du {date.toLocaleDateString('fr')}</h2>
+    <div className="legend-item">
+      <span className='legend-circle' style={{ height: "1rem",width: "1rem",display: "inline-block", backgroundColor: "red"}}></span>
+      <span className="legend-label">Détection de feu</span>
+    </div>
   </div>
 }
 
@@ -266,8 +318,15 @@ function Navbar() {
   const logoUrl = 'https://pyronear.org/img/logo_letters.png'
   return <>
       <nav>
-        <img id="logo" src={logoUrl} alt="Pyronear logo" />
-        <a id="about" href="https://pyronear.org">À propos de Pyronear</a>
+        <div className="navLeft">
+          <img id="logo" src={logoUrl} alt="Pyronear logo" />
+          <p className='title'>Risks</p>
+          <span className="pill">Beta</span>
+        </div>
+        <div className="navRight">
+            <FontAwesomeIcon icon={faGithub} className='githubIcon'/>
+            <a href="https://github.com/pyronear/hackathon-meteo-france-front">Code</a>
+        </div>
       </nav>
     </>
 }

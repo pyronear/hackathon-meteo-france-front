@@ -59,7 +59,7 @@ label {
   position: absolute;
   font-size: 12px;
   font-weight: 500;
-  top: 7px;
+  top: 8px;
   right: 20px;
 
 }
@@ -104,7 +104,7 @@ label {
 
 .btn-color-mode-switch input[type="checkbox"]:checked + label.btn-color-mode-switch-inner:after{
   content: attr(data-on);
-  left: 68px;
+  left: 77px;
   background: #256400;
 }
 
@@ -129,6 +129,16 @@ label {
   margin-right: 0.5rem;
   border-radius: 20%;
 }
+
+.legend-circle {
+  height: 1rem;
+  width: 1rem;
+  display: inline-block;
+  margin-right: 0.5rem;
+  border-radius: 100%;
+  opacity: 30%;
+}
+
 .legend-item {
   display: flex;
   align-items: center;
@@ -150,6 +160,7 @@ nav #logo {
   width: 215px;
   height: 44px;
   margin-left: -10px;
+  padding-bottom: 4px;
 }
 
 nav #about {
@@ -165,6 +176,42 @@ nav #about {
   color: #054546;
   cursor: pointer;
 }
+
+.navLeft {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.navLeft .title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #000;
+  display: block;
+  height: 100%;
+  padding: 0;
+  margin: 0;
+  margin-left: 10px;
+}
+.navLeft .pill {
+  background-color: #f0f0f0;
+  border-radius: 10px;
+  padding: 5px 10px;
+  margin-right: 10px;
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: #000;
+  display: block;
+  margin-left: 10px;
+  background: aquamarine;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+}
+
+.navRight
 
 /* Calendar stuff */
 .calendarContainer {
