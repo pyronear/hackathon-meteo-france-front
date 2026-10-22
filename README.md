@@ -2,6 +2,10 @@
 
 *Projet réalisé dans le cadre du [Hackaton meteo de data.gouv.fr](https://www.data.gouv.fr/fr/posts/hackathon-donnees-ouvertes-meteo-france-venez-valoriser-les-donnees-publiques-meteorologiques/)*.
 
+## Prérequis
+
+Node.js 24.22.1 est requis.
+
 ## Configuration
 
 - REACT_APP_MAPTILER_API_KEY : Obtenez votre clé maptiler en suivant [cette documentation](https://docs.maptiler.com/cloud/api/authentication-token/)
